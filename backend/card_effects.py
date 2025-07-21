@@ -12,7 +12,7 @@ def is_blocked_by_shield(card_type, target):
     return card_type != "Battle Axe" and hasattr(target, "shield") and target.shield > 0
 
 
-
+# Apply the effect of a card to a target player
 def apply_card_effect(game, action):
     card_type = action["card"].type
     target = next((p for p in game.players if p.id == action["target_id"]), None)
