@@ -1,0 +1,97 @@
+/* Main styles for Stab Your Friends */
+
+body {
+    font-family: sans-serif;
+    background: #0a3d0a;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #111;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+#settingsMenu {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background: #333;
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#gameArea {
+    position: relative;
+    height: calc(100vh - 100px);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 60px;
+    height: 90px;
+    background-color: #fff;
+    color: #000;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+#centerDeck {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px;
+}
+
+#bottomHand {
+    background: #111;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.theme-green {
+    background-color: #0a3d0a;
+}
+
+.theme-blue {
+    background-color: #112244;
+}
+
+.theme-red {
+    background-color: #441111;
+}
+
+.start-btn {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: none;
+    margin-top: 1rem;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.start-btn:hover {
+    background: #444;
+}

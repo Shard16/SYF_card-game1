@@ -1,0 +1,1480 @@
+Game rules
+
+Setup + Initial Round
+Determine Royal Highness: Players must decide who among them is the most fearsome. That player is awarded the crown card for the first round and becomes the royal highness. The royal highness will always draw and play cards first in each phase of the game. Players who do not address the royal highness properly may be called out by them or any other player, causing the culprit to lose a life.
+
+Drawing Phase: Starting with the royal highness and rotating clockwise, all players draw four cards face up so that other players can see what has been drawn. Players may conceal their cards once everyone has drawn.
+
+Playing Phase:
+
+Starting with the royal highness and rotating clockwise, players play one card from their hand face down in front of themselves or another player. This repeats once. (At this point, all players should have played two cards and should still have two cards in their hand).
+
+All played cards are simultaneously flipped face up and their effects are recorded in order of priority. Card priority is determined by the red number underneath the card’s name. The effects of the card with the lowest number will take place first, with subsequent cards activating in ascending order.
+
+If multiple cards of the same type are played in a round, the card effects for duplicates will take place in player order (starting with the royal highness and continuing clockwise). Duplicates played on a single player may activate in any order, just not at the same time.
+
+Cards are discarded after their effects have been recorded.
+
+Subsequent Rounds
+Passing The Crown: At the start of every new round, the royal highness must pass the crown card to the player on their left. That player becomes the new royal highness once the card has been given to them.
+
+Drawing Phase: Starting with the new royal highness and rotating clockwise, all players draw back up to a hand of four cards. Only newly drawn cards must be face up. Players may conceal their cards once everyone has drawn.
+
+Playing Phase:​ Play functions as in the initial round, with all players playing two cycles of one card face down.
+
+Player Elimination + Winning
+Player Elimination: As soon as a player loses their last life, they are immediately out of the game. This elimination occurs instantly, even if a card effect such as a Love Potion would have healed them later in the round. Once a player's life count reaches zero, they can no longer participate in any further actions, card plays, or effects.
+
+Winning: The game continues until only one player remains. As soon as there is only one player left standing, that player is declared the winner. This victory is immediate, even if the remaining player was about to lose their last life due to a card effect. The game ends the moment all other players have been eliminated.
+
+Card Effects
+Card Effects: Cards placed in front of players during the play phase have various effects described by the gray text underneath the priority number. When recording card effects, the gray text will always address the target of that card (the player the card is in front of). The functions of the cards are as follows:
+
+Golden Left Potion: Rotates all cards left.
+
+This card causes all played/active cards to move from their current target to the player on that player’s left. The new target becomes the player to the left. Once all applicable cards have been moved, this card is discarded.
+
+Left Potion: Rotates nearby cards left.
+
+This card moves all cards that have been played on the same target as this card to the player on that player’s left. The new target becomes the player to the left. Once all applicable cards have been moved, this card is discarded.
+
+Goblin Hands: Move a card.
+
+This card allows its target to move one played/active card from any player to any other player (including themselves). The only type of card that cannot be moved is another Goblin Hands card. The target of this card must move a card to a new target as long as a move is available.
+
+Shield: Block once.
+
+This card prevents its target from receiving one source of damage this round. The shield can block all damage types except from battle axes or damage invoked by improperly addressing the royal highness. The shield is discarded as soon as it prevents damage or at the end of the round if it prevents no damage.
+
+Battle Axe: Get slashed twice if you have a shield.
+
+This card deals two damage if its target has an active shield. If this card successfully deals damage, discard it alongside the shield it has broken. If the target does not have an active shield, the card does nothing and is discarded upon its activation.
+
+Bow: Shoot someone.
+
+This card allows the target to choose another player to deal one damage to. The target must choose someone to shoot. The bow is discarded after it has been used.
+
+Fireball: Fireball someone and get burned.
+
+This card deals one damage to its target and then allows them to choose another player to deal one damage to. If the fireball causes its target to lose their last life, they may not choose someone to fireball. Otherwise, the target must choose someone to fireball. The fireball is discarded after it has been used.
+
+Dagger: Get stabbed.
+
+This card deals one damage to its target. The dagger is discarded as soon as the damage has been dealt or blocked.
+
+Bomb: Explodes next turn.
+
+Upon first activation, turn this card sideways to signify it is primed. It stays on the table face up until the next activation phase, when it will deal one damage to its target. Primed bombs can be moved or rotated and will deal damage to their current target upon activation. The bomb is discarded after dealing or blocking damage.
+
+Love Potion: Heal one life.
+
+This card causes its target to regain one life. Players may not go beyond five lives; a love potion activated on a full health player will have no effect. The love potion is discarded after use or if it has no effect.
+
+Snake: Play no cards next turn.
+
+Upon activation, the target becomes snakebit and will not play any cards in the subsequent play phase. Turn this card sideways to signify its effect. The snake is discarded once the snakebit player has been prevented from playing.
+
+Crystal: Show what you play next turn.
+
+Upon activation, the target becomes entranced and will play cards face up in the subsequent play phase. Turn this card sideways to signify its effect. The crystal is discarded once the entranced player has played both of their cards face up.
+
+Drink: Nothing.
+
+Upon activation, this card is discarded.
+
+
+Steps to achieve the game
+
+✅ PHASE 1: Planning & Setup
+🔲 Game Design Finalization
+ Define core rules and game flow.
+
+ Finalize card effects and logic.
+
+ Define all possible game states (setup, draw, play, resolve, end).
+
+🔲 Tech Stack Planning
+ Frontend: HTML + CSS + JS (WebApp via Telegram).
+
+ Backend: FastAPI + WebSocket + Python.
+
+ Data: In-memory game store or Redis → upgrade to DB later.
+
+ Hosting: Fly.io / Render / Railway / PythonAnywhere (optional for MVP).
+
+ Version control: Git + GitHub repository.
+
+✅ PHASE 2: Boilerplate & Project Structure
+🔲 Project Structure
+ Create repo with folders:
+
+arduino
+Copy
+Edit
+stab-your-friends/
+├── backend/
+├── frontend/
+├── shared/
+├── .env / config.json
+├── README.md
+└── requirements.txt
+🔲 Starter Code
+ backend/main.py: FastAPI server.
+
+ frontend/game.html: Basic UI structure.
+
+ shared/config.py: Shared constants like base URL.
+
+ .gitignore: Add /__pycache__, .env, etc.
+
+✅ PHASE 3: Backend Development
+🔲 Game Logic
+ Define player model (id, username, health, hand, etc.).
+
+ Define card model (type, priority, effect, etc.).
+
+ Implement game manager with states and phase handling.
+
+ Write logic for:
+
+ Creating a game
+
+ Joining a game
+
+ Drawing cards
+
+ Playing cards
+
+ Resolving card effects
+
+ Rotating crown and rounds
+
+ Elimination and victory
+
+🔲 FastAPI Endpoints
+ POST /create_game
+
+ POST /join_game
+
+ GET /players/{game_code}
+
+ POST /draw_card
+
+ POST /play_card
+
+ POST /resolve_round
+
+ GET /game_state/{game_code}
+
+🔲 WebSocket Support
+ Add WebSocket to broadcast game state to all clients.
+
+ Support player actions: play_card, update_hand, eliminate, etc.
+
+✅ PHASE 4: Frontend Development
+🔲 HTML/CSS/JS UI
+ Menu screen with three buttons and a lobby that that a button that generates a code to enter the game that can be sent to other players and then a waiting roo where host waits for other 
+players to join and then starts the game by pressing a button
+
+ Build mobile-friendly card table layout.
+
+ Place avatars and hands on each side.
+
+ Add draggable cards for the local player.
+
+ Implement deck & discard visuals.
+
+ Show crown, health, and settings bar.
+
+🔲 Interactivity
+ drawCard(): Draw card from deck.
+
+ playCard(targetPlayer): Play card on someone.
+
+ Use WebSocket to:
+
+ Sync game state.
+
+ Update player hands.
+
+ Show animations for effects.
+
+✅ PHASE 5: Telegram Integration
+🔲 Telegram Bot Setup
+ Create bot via BotFather
+
+ Get Bot Token
+
+ Set bot commands:
+
+/start
+
+
+🔲 WebApp Integration
+ Configure WebAppInfo(url=...) in Python Telegram Bot.
+
+ Pass user info and game code to frontend via start_param.
+
+ Open game.html as a Telegram WebApp.
+
+🔲 Backend Logic
+ Identify player from Telegram.
+
+ Start game with /newgame (return WebApp link).
+
+ Join via /join ABC123.
+
+✅ PHASE 6: Advanced Features
+🔲 Game Effects Engine
+ Resolve card effects in order of priority.
+
+ Handle exceptions (shield, dead players, crown skips).
+
+ Rotate crown.
+
+ Handle bombs, snakebites, etc. over multiple rounds.
+
+🔲 Timer (optional)
+ Add per-turn countdown.
+
+ Auto-play or skip if player doesn't act.
+
+🔲 Animations (optional)
+ Flip cards.
+
+ Slide to target.
+
+ Explode bomb.
+
+✅ PHASE 7: Deployment
+🔲 Backend
+ Deploy FastAPI server to Fly.io / Railway / Render.
+
+ Expose WebSocket endpoint.
+
+ Use a dynamic tunnel (e.g. Ngrok) during development.
+
+🔲 Frontend
+ Serve game.html from FastAPI or static site.
+
+ Update Telegram WebAppInfo(url) to public URL.
+
+🔲 Telegram Bot
+ Set webhook to point to deployed backend.
+
+ Ensure bot is live and responsive.
+
+✅ PHASE 8: Testing & Launch
+🔲 Multiplayer Testing
+ Simulate 2–5 players using test accounts/devices.
+
+ Ensure game state syncs.
+
+ Test all card effects and elimination.
+
+ Debug broken logic or race conditions.
+
+🔲 Launch Prep
+ Finalize game assets (card images, sound, icons).
+
+ Add favicon, mobile responsiveness.
+
+ Add rules and credits in a modal or /rules command.
+
+ Record a short tutorial video or GIF.
+
+✅ PHASE 9: Post-Launch
+🔲 Analytics (Optional)
+ Track how many games are played, win rates, etc.
+
+🔲 Future Upgrades
+ Add login/auth (via Telegram ID).
+
+ Save game history.
+
+ Ranking system or leaderboard.
+
+
+
+
+
+CODE FOR ALL THE FILE
+
+1. main.py
+
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
+
+
+from fastapi import FastAPI, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
+from backend.models import Player
+from backend.game_manager import game_manager
+from fastapi import BackgroundTasks
+import json
+from typing import Dict, List
+from fastapi import WebSocket, WebSocketDisconnect
+import os
+
+
+
+active_connections: Dict[str, List[WebSocket]] = {}
+
+async def broadcast_game_state(game_code: str, game_state):
+    if game_code in active_connections:
+        data = json.dumps(game_state.dict())
+        for ws in active_connections[game_code]:
+            try:
+                await ws.send_text(data)
+            except Exception:
+                pass  # Ignore failed sends
+
+
+app = FastAPI(
+    title="Stab Your Friends API",
+    description="Backend for the Stab Your Friends Telegram WebApp",
+    version="0.1.0"
+)
+
+# Allow frontend (adjust origins as needed)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change to your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Stab Your Friends backend is running!"}
+
+
+@app.post("/create_game")
+async def create_game(username: str, background_tasks: BackgroundTasks = None):  # MODIFIED: add background_tasks
+    # Generate a unique game code (e.g., 6 uppercase letters)
+    import random, string
+    code = ''.join(random.choices(string.ascii_uppercase, k=6))
+    host_player = Player(id=code + "_host", username=username)
+    game_manager.create_game(code, host_player)
+    game = game_manager.get_game(code)
+    if background_tasks:
+        background_tasks.add_task(broadcast_game_state, code, game)
+    return {"game_code": code}
+
+@app.post("/join_game")
+async def join_game(
+    game_code: str = Body(...),
+    username: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    from models import Player
+    player = Player(id=game_code + "_" + username, username=username)
+    try:
+        game_manager.join_game(game_code, player)
+        game = game_manager.get_game(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": f"{username} joined game {game_code}"}
+
+@app.get("/players/{game_code}")
+async def get_players(game_code: str):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return [player.dict() for player in game.players]
+
+# ...existing code...
+
+async def draw(
+    game_code: str = Body(...),
+    player_id: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "draw":
+        raise HTTPException(status_code=400, detail="Not in draw phase")
+    try:
+        game_manager.draw_cards(game_code, player_id)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Cards drawn", "hand": [card.dict() for card in next(p for p in game.players if p.id == player_id).hand]}
+
+
+@app.post("/play_card")
+async def play_card_endpoint(
+    game_code: str = Body(...),
+    player_id: str = Body(...),
+    card_id: str = Body(...),
+    target_id: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "play":
+        raise HTTPException(status_code=400, detail="Not in play phase")
+    try:
+        game_manager.play_card(game_code, player_id, card_id, target_id)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Card played"}
+
+
+@app.post("/resolve_round")
+async def resolve_round(
+    game_code: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "resolve":
+        raise HTTPException(status_code=400, detail="Not in resolve phase")
+    try:
+        game_manager.resolve_round(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Round resolved"}
+
+@app.post("/next_round")
+async def next_round(
+    game_code: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "draw":  # Only allow next round from draw phase
+        raise HTTPException(status_code=400, detail="Not ready for next round")
+    try:
+        game_manager.next_round(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Next round started"}
+
+
+
+@app.get("/game_state/{game_code}")
+async def game_state(game_code: str):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return game
+
+
+@app.websocket("/ws/{game_code}")
+async def websocket_endpoint(websocket: WebSocket, game_code: str):
+    await websocket.accept()
+    if game_code not in active_connections:
+        active_connections[game_code] = []
+    active_connections[game_code].append(websocket)
+    try:
+        while True:
+            # Wait for any message from client (could be a ping or action)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        active_connections[game_code].remove(websocket)
+
+# BOT_TOKEN = os.getenv("8068386210:AAEiyCP3-0PVksVkX8fgomIj5JiwVuAqAbY")  # Or paste your token directly for local dev
+# WEBAPP_URL = "https://fc8343d703b2.ngrok-free.app/menu.html"  # <-- Replace with your deployed frontend URL
+
+# async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     keyboard = [
+#         [InlineKeyboardButton("▶️ Play Stab Your Friends", web_app=WebAppInfo(url=WEBAPP_URL))]
+#     ]
+#     reply_markup = InlineKeyboardMarkup(keyboard)
+#     await update.message.reply_text(
+#         "Welcome to Stab Your Friends!\nTap below to start the game.",
+#         reply_markup=reply_markup
+#     )
+
+# def run_telegram_bot():
+#     app = ApplicationBuilder().token(BOT_TOKEN).build()
+#     app.add_handler(CommandHandler("start", start_command))
+#     # Add more bot handlers if needed
+#     app.run_polling()
+
+# if __name__ == "__main__":
+#     import threading
+#     threading.Thread(target=run_telegram_bot, daemon=True).start()
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+2. telegram_bot.py
+
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from shared.config import WEB_APP_URL
+
+web_app = WebAppInfo(url=WEB_APP_URL)
+
+# Command to show web app button
+async def open_webapp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("▶️ Play", web_app=web_app)]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("🎮 Ready to play:", reply_markup=reply_markup)
+
+# Handle web app data
+async def handle_webapp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.web_app_data:
+        import json
+        data = json.loads(update.message.web_app_data.data)
+        action = data.get("action")
+        code = data.get("code")
+
+        if action == "host_game":
+            context.bot_data[code] = {
+                "host": update.effective_user.id,
+                "players": [update.effective_user.username]
+            }
+            await update.message.reply_text(f"🧑 You hosted a game with code: {code}")
+        elif action == "join_game":
+            game = context.bot_data.get(code)
+            if not game:
+                await update.message.reply_text("❌ Game code not found.")
+            else:
+                game["players"].append(update.effective_user.username)
+                await update.message.reply_text(f"✅ Joined game {code}. Players: {', '.join(game['players'])}")
+
+# Start the bot
+import os
+BOT_TOKEN = os.getenv("8068386210:AAEiyCP3-0PVksVkX8fgomIj5JiwVuAqAbY")  # Or paste your token directly for local dev
+
+app = ApplicationBuilder().token("8068386210:AAEiyCP3-0PVksVkX8fgomIj5JiwVuAqAbY").build()
+app.add_handler(CommandHandler("game", open_webapp))
+app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_webapp))
+app.run_polling()
+
+3. menu.html
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stab Your Friends - Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #222;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .menu-btn {
+            margin: 1.5rem;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.3rem;
+            border-radius: 10px;
+            border: none;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .menu-btn:hover {
+            background: #444;
+        }
+        
+        .menu-container {
+            margin-top: 5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Stab Your Friends</h1>
+    <div class="menu-container">
+        <button class="menu-btn" onclick="window.location.href='lobby.html'">Play</button>
+        <button class="menu-btn" onclick="window.location.href='rules.html'">Rules</button>
+        <button class="menu-btn" onclick="window.location.href='howtoplay.html'">How to play</button>
+    </div>
+</body>
+
+</html>
+
+4. waiting.html
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Waiting Room - Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #222;
+            color: #fff;
+            text-align: center;
+        }
+        
+        #countdown {
+            font-size: 3rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Game Starting Soon!</h1>
+    <div id="countdown">5</div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameCode = urlParams.get('code');
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = `game.html?code=${gameCode}`;
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
+
+5. card_effects.py
+
+def apply_card_effect(game, action):
+    card_type = action["card"].type
+    target = next((p for p in game.players if p.id == action["target_id"]), None)
+    player = next((p for p in game.players if p.id == action["player_id"]), None)
+
+    if not target or target.eliminated:
+        return
+
+    # Dagger: Target loses 1 health
+    if card_type == "Dagger":
+        target.health -= 1
+
+    # Shield: Target gains a shield (implement as a boolean or counter)
+    elif card_type == "Shield":
+        if not hasattr(target, "shield"):
+            target.shield = 0
+        target.shield += 1
+
+    # Bow: Target loses 1 health
+    elif card_type == "Bow":
+        target.health -= 1
+
+    # Bomb: Target is "primed" (implement primed logic)
+    elif card_type == "Bomb":
+        target.is_primed = True
+
+    # Fireball: Target loses 2 health
+    elif card_type == "Fireball":
+        target.health -= 2
+
+    # Love Potion: Target is entranced (skip next turn, for example)
+    elif card_type == "Love Potion":
+        target.entranced = True
+
+    # Snake: Target is snakebit (implement snakebit logic)
+    elif card_type == "Snake":
+        target.snakebit = True
+
+    # Crystal: Target draws 1 card (if deck not empty)
+    elif card_type == "Crystal":
+        if game.deck:
+            target.hand.append(game.deck.pop(0))
+
+    # Drink: Target regains 1 health (up to max)
+    elif card_type == "Drink":
+        if target.health < 5:
+            target.health += 1
+
+    # Golden Left Potion: Target swaps hands with player to their left
+    elif card_type == "Golden Left Potion":
+        idx = game.players.index(target)
+        left_idx = (idx + 1) % len(game.players)
+        left_player = game.players[left_idx]
+        target.hand, left_player.hand = left_player.hand, target.hand
+
+    # Left Potion: Target passes a card to player on their left
+    elif card_type == "Left Potion":
+        idx = game.players.index(target)
+        left_idx = (idx + 1) % len(game.players)
+        left_player = game.players[left_idx]
+        if target.hand:
+            left_player.hand.append(target.hand.pop(0))
+
+    # Goblin Hands: Target discards a random card (if any)
+    elif card_type == "Goblin Hands":
+        import random
+        if target.hand:
+            discarded = target.hand.pop(random.randrange(len(target.hand)))
+            game.discard.append(discarded)
+
+    # Battle Axe: Target loses 2 health
+    elif card_type == "Battle Axe":
+        target.health -= 2
+
+    # Add more card effects as needed
+
+    # Handle shield logic: If target has shield, block one damage and reduce shield
+    if hasattr(target, "shield") and target.shield > 0 and card_type in ["Dagger", "Bow", "Fireball", "Battle Axe"]:
+        # Block the damage, restore health, and reduce shield
+        if card_type == "Dagger":
+            target.health += 1
+        elif card_type == "Bow":
+            target.health += 1
+        elif card_type == "Fireball":
+            target.health += 2
+        elif card_type == "Battle Axe":
+            target.health += 2
+        target.shield -= 1
+
+6. model.py
+
+# Pydantic models for requests and responses will be defined here.
+from typing import List, Optional, Dict
+from pydantic import BaseModel
+import enum
+
+
+class CardType(str, enum.Enum):
+    GOLDEN_LEFT_POTION = "Golden Left Potion"
+    LEFT_POTION = "Left Potion"
+    GOBLIN_HANDS = "Goblin Hands"
+    SHIELD = "Shield"
+    BATTLE_AXE = "Battle Axe"
+    BOW = "Bow"
+    FIREBALL = "Fireball"
+    DAGGER = "Dagger"
+    BOMB = "Bomb"
+    LOVE_POTION = "Love Potion"
+    SNAKE = "Snake"
+    CRYSTAL = "Crystal"
+    DRINK = "Drink"
+
+class Card(BaseModel):
+    id: str
+    type: CardType
+    priority: int
+    description: str
+    is_primed: bool = False  # For bombs, snakes, etc.
+
+class Player(BaseModel):
+    id: str
+    username: str
+    health: int = 5
+    hand: List[Card] = []
+    is_royal: bool = False
+    eliminated: bool = False
+    snakebit: bool = False
+    entranced: bool = False
+    is_primed: bool = False
+    shield: int = 0
+
+class GameState(BaseModel):
+    code: str
+    players: List[Player]
+    deck: List[Card]
+    discard: List[Card]
+    crown_index: int = 0
+    phase: str = "setup"  # setup, draw, play, resolve, end
+    round: int = 1
+    played_cards: Dict[str, Dict] = {}
+    winner: Optional[str] = None  # Add this line
+
+
+7. game_manager.py
+
+# Game state, logic, turns, eliminations will be implemented here.
+
+import random
+from typing import Dict
+from .models import GameState
+
+from typing import Dict
+from .models import GameState, Player, Card, CardType
+from .card_effects import apply_card_effect
+
+
+class GameManager:
+    def __init__(self):
+        self.games: Dict[str, GameState] = {}
+
+    def create_game(self, code: str, host_player: Player):
+        # Initialize deck (for now, just a few cards for demo)
+        deck = [
+            Card(id="1", type=CardType.DAGGER, priority=1, description="Get stabbed."),
+            Card(id="2", type=CardType.SHIELD, priority=2, description="Block once."),
+            Card(id="3", type=CardType.BOW, priority=3, description="Shoot someone."),
+            # Add more cards as needed
+        ]
+        game = GameState(
+            code=code,
+            players=[host_player],
+            deck=deck,
+            discard=[],
+            crown_index=0,
+            phase="setup",
+            round=1,
+            played_cards={}  # player_id: {"card": Card, "target_id": str}
+        )
+        self.games[code] = game
+
+    def get_game(self, code: str) -> GameState:
+        return self.games.get(code)
+    
+
+    def join_game(self, code: str, player: Player):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        if any(p.username == player.username for p in game.players):
+            raise ValueError("Username already taken in this game")
+        if len(game.players) >= 5:  # Or use MAX_PLAYERS from config
+            raise ValueError("Game is full")
+        game.players.append(player)
+
+    from .models import GameState, Player, Card
+
+    def draw_cards(self, code: str, player_id: str):
+        game = self.get_game(code)
+        if not game:
+            raise ValueError("Game not found")
+        if game.phase != "draw":
+            raise ValueError("Cannot draw cards outside of draw phase")
+        player = next((p for p in game.players if p.id == player_id), None)
+        if not player or player.eliminated:
+            raise ValueError("Player not found or eliminated")
+        # Enforce draw order: must be player's turn
+        expected_player = game.players[(game.crown_index + len([p for p in game.players if len(p.hand) < 4])) % len(game.players)]
+        if player != expected_player:
+            raise ValueError("It's not your turn to draw")
+        while len(player.hand) < 4 and game.deck:
+            player.hand.append(game.deck.pop(0))
+
+
+    def play_card(self, code: str, player_id: str, card_id: str, target_id: str):
+        game = self.get_game(code)
+        if not game:
+            raise ValueError("Game not found")
+        if game.phase != "play":
+            raise ValueError("Cannot play cards outside of play phase")
+        player = next((p for p in game.players if p.id == player_id), None)
+        if not player or player.eliminated or player.snakebit or player.entranced:
+            raise ValueError("Player cannot play this round")
+        # Enforce play order: must be player's turn
+        played_this_round = sum([len(plays) for plays in game.played_cards.values()])
+        expected_player = game.players[(game.crown_index + played_this_round) % len(game.players)]
+        if player != expected_player:
+            raise ValueError("It's not your turn to play")
+        card = next((c for c in player.hand if c.id == card_id), None)
+        if not card:
+            raise ValueError("Card not in hand")
+        if player_id in game.played_cards and len(game.played_cards[player_id]) >= 2:
+            raise ValueError("Player has already played two cards this round")
+        player.hand = [c for c in player.hand if c.id != card_id]
+        if player_id not in game.played_cards:
+            game.played_cards[player_id] = []
+        game.played_cards[player_id].append({"card": card, "target_id": target_id})
+
+    # ...existing code...
+
+    def resolve_round(self, code: str):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        actions = []
+        for player_id, plays in game.played_cards.items():
+            for play in plays:
+                actions.append({
+                    "player_id": player_id,
+                    "card": play["card"],
+                    "target_id": play["target_id"]
+                })
+        def player_order(pid):
+            idx = next((i for i, p in enumerate(game.players) if p.id == pid), None)
+            if idx is None:
+                return 999
+            return (idx - game.crown_index) % len(game.players)
+        actions.sort(key=lambda x: (x["card"].priority, player_order(x["player_id"])))
+        # Apply effects and check elimination/victory after each
+        for action in actions:
+            apply_card_effect(game, action)
+            game.discard.append(action["card"])
+            # Eliminate players with 0 or less health immediately
+            for player in game.players:
+                if player.health <= 0 and not player.eliminated:
+                    player.eliminated = True
+            # Check win condition immediately
+            alive_players = [p for p in game.players if not p.eliminated]
+            if len(alive_players) == 1:
+                game.phase = "end"
+                game.winner = alive_players[0].username
+                game.played_cards = {}
+                return  # End round immediately if only one remains
+        # If more than one player remains, advance as usual
+        game.phase = "draw"
+        game.round += 1
+        game.played_cards = {}
+    
+    def next_round(self, code: str):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        # Rotate crown to the left (next player who is not eliminated)
+        alive_players = [p for p in game.players if not p.eliminated]
+        if not alive_players:
+            game.phase = "end"
+            return
+        # Find next alive player
+        next_crown = (game.crown_index + 1) % len(game.players)
+        while game.players[next_crown].eliminated:
+            next_crown = (next_crown + 1) % len(game.players)
+        game.crown_index = next_crown
+        for idx, player in enumerate(game.players):
+            player.is_royal = (idx == game.crown_index)
+        # Reset per-round statuses
+        for player in game.players:
+            player.shield = 0
+            if player.snakebit:
+                player.snakebit = False
+            if player.entranced:
+                player.entranced = False
+        # Handle bombs: deal damage if primed
+        for player in game.players:
+            for card in list(player.hand):
+                if getattr(card, "is_primed", False):
+                    player.health -= 1
+                    player.hand.remove(card)
+                    game.discard.append(card)
+        # Advance round number and phase
+        game.round += 1
+        game.phase = "draw"
+        # Draw up to 4 cards for each alive player, starting with royal highness
+        start = game.crown_index
+        for i in range(len(game.players)):
+            idx = (start + i) % len(game.players)
+            player = game.players[idx]
+            if player.eliminated:
+                continue
+            while len(player.hand) < 4 and game.deck:
+                player.hand.append(game.deck.pop(0))
+
+                # If deck is empty, reshuffle discard into deck
+                if not game.deck:
+                    game.deck = game.discard
+                    game.discard = []
+                    random.shuffle(game.deck)
+game_manager = GameManager()
+
+8. game.html
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <header>
+        <button onclick="goToMenu()">⬅️</button>
+        <div>
+            <button onclick="toggleSettings()">⚙️</button>
+            <div id="settingsMenu">
+                <button onclick="changeColor('#0a3d0a')">Green</button>
+                <button onclick="changeColor('#112244')">Blue</button>
+                <button onclick="changeColor('#441111')">Red</button>
+            </div>
+        </div>
+        <div id="health">❤️ 5</div>
+    </header>
+
+    <div id="gameArea">
+        <!-- Dynamic player zones will be injected here by JS -->
+        <div id="centerDeck">
+            <div class="card" id="deck" onclick="drawCard()">📄</div>
+            <div class="card" id="discard">🔪</div>
+        </div>
+    </div>
+
+    <div id="bottomHand"></div>
+
+    <script>
+        function changeColor(color) {
+            document.body.style.backgroundColor = color;
+        }
+
+        function toggleSettings() {
+            const menu = document.getElementById("settingsMenu");
+            menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+        }
+
+        function goToMenu() {
+            window.location.href = "menu.html";
+        }
+    </script>
+    <script src="scripts/game.js"></script>
+</body>
+
+</html>
+
+9. game.js
+
+// JS logic for drag, draw, play, WebSocket, etc. will go here.
+
+// scripts/game.js
+
+const API_BASE = "http://localhost:8000"; // Adjust if needed
+const gameCode = localStorage.getItem("game_code");
+const username = localStorage.getItem("username");
+const bottomHand = document.getElementById("bottomHand");
+const gameArea = document.getElementById("gameArea");
+let ws;
+
+// Connect to WebSocket for live game state updates
+function connectWebSocket() {
+    if (!gameCode) return;
+    ws = new WebSocket(`${API_BASE.replace(/^http/, "ws")}/ws/${gameCode}`);
+    ws.onmessage = (event) => {
+        const state = JSON.parse(event.data);
+        renderGame(state);
+    };
+    ws.onclose = () => setTimeout(connectWebSocket, 2000);
+}
+connectWebSocket();
+
+async function fetchGameState() {
+    try {
+        const res = await fetch(`${API_BASE}/game_state/${gameCode}`);
+        const data = await res.json();
+        renderGame(data);
+    } catch (err) {
+        console.error("Failed to fetch game state:", err);
+    }
+}
+
+function renderGame(state) {
+    // Clear player areas except center deck
+    document.querySelectorAll(".playerArea").forEach(el => el.remove());
+
+    // Render all players
+    state.players.forEach(player => {
+        if (player.username === username) {
+            renderBottomHand(player.hand, player);
+        } else {
+            renderPlayer(player, state);
+        }
+    });
+
+    // Update health display
+    const me = state.players.find(p => p.username === username);
+    if (me) {
+        document.getElementById("health").textContent = `❤️ ${me.health}`;
+    }
+}
+
+function renderBottomHand(hand, player) {
+    bottomHand.innerHTML = "";
+    hand.forEach(card => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        cardDiv.textContent = card.type;
+        cardDiv.title = card.description;
+        cardDiv.onclick = () => playCard(card.id);
+        if (card.is_primed) cardDiv.style.border = "2px solid orange";
+        bottomHand.appendChild(cardDiv);
+    });
+    // Show status effects
+    showStatusEffects(player, bottomHand);
+}
+
+function renderPlayer(player, state) {
+    const div = document.createElement("div");
+    div.className = "playerArea";
+    div.innerHTML = `
+        <div class="avatar">${player.username[0]}</div>
+        <div class="username">${player.username}${player.is_royal ? " 👑" : ""}</div>
+        <div class="health">❤️ ${player.health}</div>
+        <div class="status">${getStatusText(player)}</div>
+        <div class="hand">
+            ${player.hand.map(card => `<div class="card" title="${card.description}">${card.type}${card.is_primed ? " 🔥" : ""}</div>`).join("")}
+        </div>
+    `;
+    gameArea.appendChild(div);
+}
+
+function getStatusText(player) {
+    let status = [];
+    if (player.eliminated) status.push("💀 Eliminated");
+    if (player.snakebit) status.push("🐍 Snakebit");
+    if (player.entranced) status.push("🔮 Entranced");
+    if (player.is_primed) status.push("💣 Primed");
+    if (player.shield > 0) status.push("🛡️ Shield x" + player.shield);
+    return status.join(" | ");
+}
+
+function showStatusEffects(player, container) {
+    let effects = [];
+    if (player.snakebit) effects.push("🐍 Snakebit: skip next play");
+    if (player.entranced) effects.push("🔮 Entranced: play face up");
+    if (player.is_primed) effects.push("💣 Primed: bomb will explode");
+    if (player.shield > 0) effects.push("🛡️ Shield x" + player.shield);
+    if (effects.length) {
+        const effDiv = document.createElement("div");
+        effDiv.className = "effects";
+        effDiv.textContent = effects.join(" | ");
+        container.appendChild(effDiv);
+    }
+}
+
+async function drawCard() {
+    try {
+        const res = await fetch(`${API_BASE}/draw`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ game_code: gameCode, player_id: `${gameCode}_${username}` })
+        });
+        const data = await res.json();
+        fetchGameState();
+    } catch (err) {
+        alert("Failed to draw card: " + err.message);
+    }
+}
+
+async function playCard(cardId) {
+    try {
+        const target = prompt("Enter target player's username:");
+        if (!target) return;
+        // Find target player id
+        const state = await (await fetch(`${API_BASE}/game_state/${gameCode}`)).json();
+        const targetPlayer = state.players.find(p => p.username === target);
+        if (!targetPlayer) return alert("Player not found!");
+        await fetch(`${API_BASE}/play_card`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                game_code: gameCode,
+                player_id: `${gameCode}_${username}`,
+                card_id: cardId,
+                target_id: targetPlayer.id
+            })
+        });
+        fetchGameState();
+    } catch (err) {
+        alert("Failed to play card: " + err.message);
+    }
+}
+
+function goToMenu() {
+    window.location.href = "menu.html";
+}
+
+function toggleSettings() {
+    const menu = document.getElementById("settingsMenu");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+function changeColor(color) {
+    const body = document.body;
+    body.classList.remove("theme-green", "theme-blue", "theme-red");
+    if (color === "#0a3d0a") body.classList.add("theme-green");
+    else if (color === "#112244") body.classList.add("theme-blue");
+    else if (color === "#441111") body.classList.add("theme-red");
+}
+
+// Initial fetch and poll fallback
+fetchGameState();
+setInterval(fetchGameState, 5000);
+
+10. main.css
+
+/* Main styles for Stab Your Friends */
+
+body {
+    font-family: sans-serif;
+    background: #0a3d0a;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #111;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+#settingsMenu {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background: #333;
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#gameArea {
+    position: relative;
+    height: calc(100vh - 100px);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 60px;
+    height: 90px;
+    background-color: #fff;
+    color: #000;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+#centerDeck {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px;
+}
+
+#bottomHand {
+    background: #111;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.theme-green {
+    background-color: #0a3d0a;
+}
+
+.theme-blue {
+    background-color: #112244;
+}
+
+.theme-red {
+    background-color: #441111;
+}
+
+.start-btn {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: none;
+    margin-top: 1rem;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.start-btn:hover {
+    background: #444;
+}
+
+11. lobby.html
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Game Lobby</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        button,
+        input {
+            margin: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+        }
+        
+        input {
+            width: 200px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 400px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 0 10px #000;
+        }
+        
+        .code-box {
+            font-size: 28px;
+            background: #fff;
+            color: #000;
+            margin: 15px auto;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: fit-content;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Start a Game</h2>
+    <button onclick="hostGame()">🧑 Host Game</button>
+
+    <h2>Join a Game</h2>
+    <input type="text" id="joinKey" placeholder="Enter Game Code">
+    <button onclick="joinGame()">🙋 Join Game</button>
+
+    <!-- Game Code Modal -->
+    <div id="codeModal" class="modal">
+        <div class="modal-content">
+            <h3>🎲 Your Game Code</h3>
+            <div id="generatedCode" class="code-box">ABC123</div>
+            <button onclick="copyCode()">📋 Copy Code</button>
+            <button onclick="goToWaitingRoom()">▶️ Start Game</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        let username = tg.initDataUnsafe.user ?.username || "Unknown";
+        let firstName = tg.initDataUnsafe.user ?.first_name || "Player";
+
+        async function hostGame() {
+            username = prompt("Enter your name:") || username;
+            if (!username) return alert("Enter a valid name!");
+            try {
+                const response = await fetch("/create_game", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username
+                    })
+                });
+                if (!response.ok) {
+                    alert("❌ Failed to create game.");
+                    return;
+                }
+                const data = await response.json();
+                const code = data.game_code;
+                localStorage.setItem("game_code", code);
+                localStorage.setItem("role", "host");
+                localStorage.setItem("username", username);
+                document.getElementById("generatedCode").innerText = code;
+                document.getElementById("codeModal").style.display = "block";
+            } catch (err) {
+                alert("⚠️ Failed to create game.");
+            }
+        }
+
+        function copyCode() {
+            const code = document.getElementById("generatedCode").innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert("Game code copied!");
+            });
+        }
+
+        function goToWaitingRoom() {
+            document.getElementById("codeModal").style.display = "none";
+            window.location.href = "waiting_room.html";
+        }
+
+        async function joinGame() {
+            const code = document.getElementById("joinKey").value.trim().toUpperCase();
+            username = prompt("Enter your name:") || username;
+            if (!code) return alert("Enter a valid code!");
+            if (!username) return alert("Enter a valid name!");
+            try {
+                const response = await fetch("/join_game", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        game_code: code,
+                        username
+                    })
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert("❌ " + error.detail);
+                    return;
+                }
+                localStorage.setItem("game_code", code);
+                localStorage.setItem("role", "player");
+                localStorage.setItem("username", username);
+                window.location.href = "waiting_room.html";
+            } catch (err) {
+                alert("⚠️ Failed to join game. Check your network/server.");
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+
+

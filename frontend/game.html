@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <header>
+        <button onclick="goToMenu()">⬅️</button>
+        <div>
+            <button onclick="toggleSettings()">⚙️</button>
+            <div id="settingsMenu">
+                <button onclick="changeColor('#0a3d0a')">Green</button>
+                <button onclick="changeColor('#112244')">Blue</button>
+                <button onclick="changeColor('#441111')">Red</button>
+            </div>
+        </div>
+        <div id="health">❤️ 5</div>
+    </header>
+
+    <div id="gameArea">
+        <!-- Dynamic player zones will be injected here by JS -->
+        <div id="centerDeck">
+            <div class="card" id="deck" onclick="drawCard()">📄</div>
+            <div class="card" id="discard">🔪</div>
+        </div>
+    </div>
+
+    <div id="bottomHand"></div>
+
+    <div style="padding: 10px; background: #111;">
+        <div id="phaseIndicator">Phase: ...</div>
+        <div id="turnIndicator">Turn: ...</div>
+    </div>
+
+
+    <div id="targetModal" class="modal">
+        <div class="modal-content">
+            <h3>Select a target</h3>
+            <div id="targetList"></div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            margin: 20% auto;
+            background: #222;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            text-align: center;
+        }
+    </style>
+
+
+    <script>
+        function changeColor(color) {
+            document.body.style.backgroundColor = color;
+        }
+
+        function toggleSettings() {
+            const menu = document.getElementById("settingsMenu");
+            menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+        }
+
+        function goToMenu() {
+            window.location.href = "menu.html";
+        }
+    </script>
+    <script src="scripts/game.js"></script>
+</body>
+
+</html>

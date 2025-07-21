@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Game Lobby</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        button,
+        input {
+            margin: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+        }
+        
+        input {
+            width: 200px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 400px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 0 10px #000;
+        }
+        
+        .code-box {
+            font-size: 28px;
+            background: #fff;
+            color: #000;
+            margin: 15px auto;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: fit-content;
+        }
+        
+        #players {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Start a Game</h2>
+    <button id="generate-btn">🧑 Host Game</button>
+
+    <h2>Join a Game</h2>
+    <input type="text" id="joinKey" placeholder="Enter Game Code">
+    <button id="join-btn">🙋 Join Game</button>
+
+    <!-- Game Code Modal -->
+    <div id="codeModal" class="modal">
+        <div class="modal-content">
+            <h3>🎲 Your Game Code</h3>
+            <div id="code" class="code-box">ABC123</div>
+            <button id="copy-btn">📋 Copy Code</button>
+            <button id="start-btn">▶️ Start Game</button>
+        </div>
+    </div>
+
+    <div id="players"></div>
+
+    <script>
+        let gameCode = null;
+        let isHost = false;
+        let username = null;
+
+        const codeDiv = document.getElementById('code');
+        const generateBtn = document.getElementById('generate-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const startBtn = document.getElementById('start-btn');
+        const playersDiv = document.getElementById('players');
+        const joinBtn = document.getElementById('join-btn');
+
+        function showModal() {
+            document.getElementById("codeModal").style.display = "block";
+        }
+
+        function showCode() {
+            codeDiv.textContent = gameCode || "";
+            if (gameCode) {
+                copyBtn.style.display = '';
+                startBtn.style.display = '';
+            }
+        }
+
+        generateBtn.onclick = async() => {
+            username = prompt("Enter your name:");
+            if (!username) return;
+
+            const res = await fetch('/create_game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username
+                })
+            });
+
+            const data = await res.json();
+            gameCode = data.game_code;
+            isHost = true;
+
+            localStorage.setItem("game_code", gameCode);
+            localStorage.setItem("username", username);
+
+            showCode();
+            showModal();
+
+            await joinGame(username);
+            fetchPlayers();
+            setInterval(fetchPlayers, 1500);
+        };
+
+        joinBtn.onclick = async() => {
+            const code = document.getElementById("joinKey").value.trim().toUpperCase();
+            username = prompt("Enter your name:");
+            if (!code || !username) return alert("Enter a valid code and name!");
+
+            gameCode = code;
+            localStorage.setItem("game_code", gameCode);
+            localStorage.setItem("username", username);
+
+            await joinGame(username);
+            fetchPlayers();
+            setInterval(fetchPlayers, 1500);
+            showCode();
+            showModal();
+        };
+
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(gameCode);
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => (copyBtn.textContent = "📋 Copy Code"), 1000);
+        };
+
+        startBtn.onclick = () => {
+            window.location.href = `waiting.html?code=${gameCode}&host=1`;
+        };
+
+        async function joinGame(name) {
+            await fetch('/join_game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    game_code: gameCode,
+                    username: name
+                })
+            });
+        }
+
+        async function fetchPlayers() {
+            if (!gameCode) return;
+            const res = await fetch(`/players/${gameCode}`);
+            const players = await res.json();
+            playersDiv.innerHTML = '<b>Players:</b><br>' + players.map(p => p.username).join('<br>');
+        }
+
+        // Auto-join via URL (for shared lobby links)
+        window.onload = async() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('code')) {
+                gameCode = urlParams.get('code');
+                isHost = urlParams.get('host') === '1';
+                username = prompt("Enter your name:");
+                if (username) {
+                    localStorage.setItem("game_code", gameCode);
+                    localStorage.setItem("username", username);
+                    await joinGame(username);
+                    showCode();
+                    fetchPlayers();
+                    setInterval(fetchPlayers, 1500);
+                    showModal();
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>

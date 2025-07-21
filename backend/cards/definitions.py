@@ -1,0 +1,1 @@
+# Card metadata (name, priority, type) will be defined here.

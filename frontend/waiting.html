@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Waiting Room - Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #222;
+            color: #fff;
+            text-align: center;
+        }
+        
+        #countdown {
+            font-size: 3rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Game Starting Soon!</h1>
+    <div id="countdown">5</div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameCode = urlParams.get('code');
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = `game.html?code=${gameCode}`;
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,705 @@
+Main.py
+
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, ContextTypes, filters
+
+
+from fastapi import FastAPI, HTTPException, Body
+from fastapi.middleware.cors import CORSMiddleware
+from models import Player
+from game_manager import game_manager
+from fastapi import BackgroundTasks
+import json
+from typing import Dict, List
+from fastapi import WebSocket, WebSocketDisconnect
+
+
+
+active_connections: Dict[str, List[WebSocket]] = {}
+
+async def broadcast_game_state(game_code: str, game_state):
+    if game_code in active_connections:
+        data = json.dumps(game_state.dict())
+        for ws in active_connections[game_code]:
+            try:
+                await ws.send_text(data)
+            except Exception:
+                pass  # Ignore failed sends
+
+
+app = FastAPI(
+    title="Stab Your Friends API",
+    description="Backend for the Stab Your Friends Telegram WebApp",
+    version="0.1.0"
+)
+
+# Allow frontend (adjust origins as needed)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change to your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Stab Your Friends backend is running!"}
+
+
+@app.post("/create_game")
+async def create_game(username: str, background_tasks: BackgroundTasks = None):  # MODIFIED: add background_tasks
+    # Generate a unique game code (e.g., 6 uppercase letters)
+    import random, string
+    code = ''.join(random.choices(string.ascii_uppercase, k=6))
+    host_player = Player(id=code + "_host", username=username)
+    game_manager.create_game(code, host_player)
+    game = game_manager.get_game(code)
+    if background_tasks:
+        background_tasks.add_task(broadcast_game_state, code, game)
+    return {"game_code": code}
+
+@app.post("/join_game")
+async def join_game(
+    game_code: str = Body(...),
+    username: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    from models import Player
+    player = Player(id=game_code + "_" + username, username=username)
+    try:
+        game_manager.join_game(game_code, player)
+        game = game_manager.get_game(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": f"{username} joined game {game_code}"}
+
+@app.get("/players/{game_code}")
+async def get_players(game_code: str):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return [player.dict() for player in game.players]
+
+# ...existing code...
+
+async def draw(
+    game_code: str = Body(...),
+    player_id: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "draw":
+        raise HTTPException(status_code=400, detail="Not in draw phase")
+    try:
+        game_manager.draw_cards(game_code, player_id)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Cards drawn", "hand": [card.dict() for card in next(p for p in game.players if p.id == player_id).hand]}
+
+
+@app.post("/play_card")
+async def play_card_endpoint(
+    game_code: str = Body(...),
+    player_id: str = Body(...),
+    card_id: str = Body(...),
+    target_id: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "play":
+        raise HTTPException(status_code=400, detail="Not in play phase")
+    try:
+        game_manager.play_card(game_code, player_id, card_id, target_id)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Card played"}
+
+
+@app.post("/resolve_round")
+async def resolve_round(
+    game_code: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "resolve":
+        raise HTTPException(status_code=400, detail="Not in resolve phase")
+    try:
+        game_manager.resolve_round(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Round resolved"}
+
+@app.post("/next_round")
+async def next_round(
+    game_code: str = Body(...),
+    background_tasks: BackgroundTasks = None
+):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    if game.phase != "draw":  # Only allow next round from draw phase
+        raise HTTPException(status_code=400, detail="Not ready for next round")
+    try:
+        game_manager.next_round(game_code)
+        if background_tasks:
+            background_tasks.add_task(broadcast_game_state, game_code, game)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"message": "Next round started"}
+
+
+
+@app.get("/game_state/{game_code}")
+async def game_state(game_code: str):
+    game = game_manager.get_game(game_code)
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    return game
+
+
+@app.websocket("/ws/{game_code}")
+async def websocket_endpoint(websocket: WebSocket, game_code: str):
+    await websocket.accept()
+    if game_code not in active_connections:
+        active_connections[game_code] = []
+    active_connections[game_code].append(websocket)
+    try:
+        while True:
+            # Wait for any message from client (could be a ping or action)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        active_connections[game_code].remove(websocket)
+
+
+
+Menu.html
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stab Your Friends - Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; text-align: center; }
+        .menu-btn { margin: 1rem; padding: 1rem 2rem; font-size: 1.2rem; border-radius: 8px; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Stab Your Friends</h1>
+    <button class="menu-btn" onclick="window.location.href='lobby.html?host=1'">Create Game</button>
+    <br>
+    <input id="join-code" placeholder="Enter Game Code" maxlength="6" style="padding:0.5rem; font-size:1rem;">
+    <button class="menu-btn" onclick="joinGame()">Join Game</button>
+    <script>
+        function joinGame() {
+            const code = document.getElementById('join-code').value.trim().toUpperCase();
+            if (code.length === 6) {
+                window.location.href = `lobby.html?code=${code}`;
+            } else {
+                alert("Please enter a valid 6-letter code.");
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+Waiting.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Waiting Room - Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; text-align: center; }
+        #countdown { font-size: 3rem; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <h1>Game Starting Soon!</h1>
+    <div id="countdown">5</div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameCode = urlParams.get('code');
+        let seconds = 5;
+        const countdownEl = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = `game.html?code=${gameCode}`;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
+
+
+Card_effects.py
+
+def apply_card_effect(game, action):
+    card_type = action["card"].type
+    target = next((p for p in game.players if p.id == action["target_id"]), None)
+    player = next((p for p in game.players if p.id == action["player_id"]), None)
+
+    if not target or target.eliminated:
+        return
+
+    # Dagger: Target loses 1 health
+    if card_type == "Dagger":
+        target.health -= 1
+
+    # Shield: Target gains a shield (implement as a boolean or counter)
+    elif card_type == "Shield":
+        if not hasattr(target, "shield"):
+            target.shield = 0
+        target.shield += 1
+
+    # Bow: Target loses 1 health
+    elif card_type == "Bow":
+        target.health -= 1
+
+    # Bomb: Target is "primed" (implement primed logic)
+    elif card_type == "Bomb":
+        target.is_primed = True
+
+    # Fireball: Target loses 2 health
+    elif card_type == "Fireball":
+        target.health -= 2
+
+    # Love Potion: Target is entranced (skip next turn, for example)
+    elif card_type == "Love Potion":
+        target.entranced = True
+
+    # Snake: Target is snakebit (implement snakebit logic)
+    elif card_type == "Snake":
+        target.snakebit = True
+
+    # Crystal: Target draws 1 card (if deck not empty)
+    elif card_type == "Crystal":
+        if game.deck:
+            target.hand.append(game.deck.pop(0))
+
+    # Drink: Target regains 1 health (up to max)
+    elif card_type == "Drink":
+        if target.health < 5:
+            target.health += 1
+
+    # Golden Left Potion: Target swaps hands with player to their left
+    elif card_type == "Golden Left Potion":
+        idx = game.players.index(target)
+        left_idx = (idx + 1) % len(game.players)
+        left_player = game.players[left_idx]
+        target.hand, left_player.hand = left_player.hand, target.hand
+
+    # Left Potion: Target passes a card to player on their left
+    elif card_type == "Left Potion":
+        idx = game.players.index(target)
+        left_idx = (idx + 1) % len(game.players)
+        left_player = game.players[left_idx]
+        if target.hand:
+            left_player.hand.append(target.hand.pop(0))
+
+    # Goblin Hands: Target discards a random card (if any)
+    elif card_type == "Goblin Hands":
+        import random
+        if target.hand:
+            discarded = target.hand.pop(random.randrange(len(target.hand)))
+            game.discard.append(discarded)
+
+    # Battle Axe: Target loses 2 health
+    elif card_type == "Battle Axe":
+        target.health -= 2
+
+    # Add more card effects as needed
+
+    # Handle shield logic: If target has shield, block one damage and reduce shield
+    if hasattr(target, "shield") and target.shield > 0 and card_type in ["Dagger", "Bow", "Fireball", "Battle Axe"]:
+        # Block the damage, restore health, and reduce shield
+        if card_type == "Dagger":
+            target.health += 1
+        elif card_type == "Bow":
+            target.health += 1
+        elif card_type == "Fireball":
+            target.health += 2
+        elif card_type == "Battle Axe":
+            target.health += 2
+        target.shield -= 1
+
+models.py
+
+# Pydantic models for requests and responses will be defined here.
+from typing import List, Optional, Dict
+from pydantic import BaseModel
+import enum
+
+
+class CardType(str, enum.Enum):
+    GOLDEN_LEFT_POTION = "Golden Left Potion"
+    LEFT_POTION = "Left Potion"
+    GOBLIN_HANDS = "Goblin Hands"
+    SHIELD = "Shield"
+    BATTLE_AXE = "Battle Axe"
+    BOW = "Bow"
+    FIREBALL = "Fireball"
+    DAGGER = "Dagger"
+    BOMB = "Bomb"
+    LOVE_POTION = "Love Potion"
+    SNAKE = "Snake"
+    CRYSTAL = "Crystal"
+    DRINK = "Drink"
+
+class Card(BaseModel):
+    id: str
+    type: CardType
+    priority: int
+    description: str
+    is_primed: bool = False  # For bombs, snakes, etc.
+
+class Player(BaseModel):
+    id: str
+    username: str
+    health: int = 5
+    hand: List[Card] = []
+    is_royal: bool = False
+    eliminated: bool = False
+    snakebit: bool = False
+    entranced: bool = False
+    is_primed: bool = False
+    shield: int = 0
+
+class GameState(BaseModel):
+    code: str
+    players: List[Player]
+    deck: List[Card]
+    discard: List[Card]
+    crown_index: int = 0
+    phase: str = "setup"  # setup, draw, play, resolve, end
+    round: int = 1
+    played_cards: Dict[str, Dict] = {}
+    winner: Optional[str] = None  # Add this line
+
+
+game_manager.py
+
+# Game state, logic, turns, eliminations will be implemented here.
+
+import random
+from typing import Dict
+from .models import GameState
+
+from typing import Dict
+from .models import GameState, Player, Card, CardType
+from .card_effects import apply_card_effect
+
+
+class GameManager:
+    def __init__(self):
+        self.games: Dict[str, GameState] = {}
+
+    def create_game(self, code: str, host_player: Player):
+        # Initialize deck (for now, just a few cards for demo)
+        deck = [
+            Card(id="1", type=CardType.DAGGER, priority=1, description="Get stabbed."),
+            Card(id="2", type=CardType.SHIELD, priority=2, description="Block once."),
+            Card(id="3", type=CardType.BOW, priority=3, description="Shoot someone."),
+            # Add more cards as needed
+        ]
+        game = GameState(
+            code=code,
+            players=[host_player],
+            deck=deck,
+            discard=[],
+            crown_index=0,
+            phase="setup",
+            round=1,
+            played_cards={}  # player_id: {"card": Card, "target_id": str}
+        )
+        self.games[code] = game
+
+    def get_game(self, code: str) -> GameState:
+        return self.games.get(code)
+    
+
+    def join_game(self, code: str, player: Player):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        if any(p.username == player.username for p in game.players):
+            raise ValueError("Username already taken in this game")
+        if len(game.players) >= 5:  # Or use MAX_PLAYERS from config
+            raise ValueError("Game is full")
+        game.players.append(player)
+
+    from .models import GameState, Player, Card
+
+    def draw_cards(self, code: str, player_id: str):
+        game = self.get_game(code)
+        if not game:
+            raise ValueError("Game not found")
+        if game.phase != "draw":
+            raise ValueError("Cannot draw cards outside of draw phase")
+        player = next((p for p in game.players if p.id == player_id), None)
+        if not player or player.eliminated:
+            raise ValueError("Player not found or eliminated")
+        # Enforce draw order: must be player's turn
+        expected_player = game.players[(game.crown_index + len([p for p in game.players if len(p.hand) < 4])) % len(game.players)]
+        if player != expected_player:
+            raise ValueError("It's not your turn to draw")
+        while len(player.hand) < 4 and game.deck:
+            player.hand.append(game.deck.pop(0))
+
+
+    def play_card(self, code: str, player_id: str, card_id: str, target_id: str):
+        game = self.get_game(code)
+        if not game:
+            raise ValueError("Game not found")
+        if game.phase != "play":
+            raise ValueError("Cannot play cards outside of play phase")
+        player = next((p for p in game.players if p.id == player_id), None)
+        if not player or player.eliminated or player.snakebit or player.entranced:
+            raise ValueError("Player cannot play this round")
+        # Enforce play order: must be player's turn
+        played_this_round = sum([len(plays) for plays in game.played_cards.values()])
+        expected_player = game.players[(game.crown_index + played_this_round) % len(game.players)]
+        if player != expected_player:
+            raise ValueError("It's not your turn to play")
+        card = next((c for c in player.hand if c.id == card_id), None)
+        if not card:
+            raise ValueError("Card not in hand")
+        if player_id in game.played_cards and len(game.played_cards[player_id]) >= 2:
+            raise ValueError("Player has already played two cards this round")
+        player.hand = [c for c in player.hand if c.id != card_id]
+        if player_id not in game.played_cards:
+            game.played_cards[player_id] = []
+        game.played_cards[player_id].append({"card": card, "target_id": target_id})
+
+    # ...existing code...
+
+    def resolve_round(self, code: str):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        actions = []
+        for player_id, plays in game.played_cards.items():
+            for play in plays:
+                actions.append({
+                    "player_id": player_id,
+                    "card": play["card"],
+                    "target_id": play["target_id"]
+                })
+        def player_order(pid):
+            idx = next((i for i, p in enumerate(game.players) if p.id == pid), None)
+            if idx is None:
+                return 999
+            return (idx - game.crown_index) % len(game.players)
+        actions.sort(key=lambda x: (x["card"].priority, player_order(x["player_id"])))
+        # Apply effects and check elimination/victory after each
+        for action in actions:
+            apply_card_effect(game, action)
+            game.discard.append(action["card"])
+            # Eliminate players with 0 or less health immediately
+            for player in game.players:
+                if player.health <= 0 and not player.eliminated:
+                    player.eliminated = True
+            # Check win condition immediately
+            alive_players = [p for p in game.players if not p.eliminated]
+            if len(alive_players) == 1:
+                game.phase = "end"
+                game.winner = alive_players[0].username
+                game.played_cards = {}
+                return  # End round immediately if only one remains
+        # If more than one player remains, advance as usual
+        game.phase = "draw"
+        game.round += 1
+        game.played_cards = {}
+    
+    def next_round(self, code: str):
+        game = self.games.get(code)
+        if not game:
+            raise ValueError("Game not found")
+        # Rotate crown to the left (next player who is not eliminated)
+        alive_players = [p for p in game.players if not p.eliminated]
+        if not alive_players:
+            game.phase = "end"
+            return
+        # Find next alive player
+        next_crown = (game.crown_index + 1) % len(game.players)
+        while game.players[next_crown].eliminated:
+            next_crown = (next_crown + 1) % len(game.players)
+        game.crown_index = next_crown
+        for idx, player in enumerate(game.players):
+            player.is_royal = (idx == game.crown_index)
+        # Reset per-round statuses
+        for player in game.players:
+            player.shield = 0
+            if player.snakebit:
+                player.snakebit = False
+            if player.entranced:
+                player.entranced = False
+        # Handle bombs: deal damage if primed
+        for player in game.players:
+            for card in list(player.hand):
+                if getattr(card, "is_primed", False):
+                    player.health -= 1
+                    player.hand.remove(card)
+                    game.discard.append(card)
+        # Advance round number and phase
+        game.round += 1
+        game.phase = "draw"
+        # Draw up to 4 cards for each alive player, starting with royal highness
+        start = game.crown_index
+        for i in range(len(game.players)):
+            idx = (start + i) % len(game.players)
+            player = game.players[idx]
+            if player.eliminated:
+                continue
+            while len(player.hand) < 4 and game.deck:
+                player.hand.append(game.deck.pop(0))
+
+                # If deck is empty, reshuffle discard into deck
+                if not game.deck:
+                    game.deck = game.discard
+                    game.discard = []
+                    random.shuffle(game.deck)
+game_manager = GameManager()
+
+
+game.html
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #222;
+            color: #fff;
+        }
+        
+        #game-table {
+            margin: 2rem auto;
+            width: 90%;
+            max-width: 600px;
+            background: #333;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-table">
+        <h1>Stab Your Friends</h1>
+        <p>Game UI coming soon...</p>
+    </div>
+</body>
+
+</html>
+
+lobby.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lobby - Stab Your Friends</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; text-align: center; }
+        #code { font-size: 2rem; margin: 1rem 0; letter-spacing: 0.2em; }
+        #players { margin: 1rem 0; }
+        .start-btn { padding: 1rem 2rem; font-size: 1.2rem; border-radius: 8px; border: none; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <h1>Lobby</h1>
+    <div id="code"></div>
+    <div>Share this code with your friends!</div>
+    <div id="players">Loading players...</div>
+    <button id="start-btn" class="start-btn" style="display:none;" onclick="startGame()">Start Game</button>
+    <script src="main.js"></script>
+    <script>
+        // Parse query params
+        const urlParams = new URLSearchParams(window.location.search);
+        let gameCode = urlParams.get('code');
+        const isHost = urlParams.get('host') === '1';
+
+        async function createGame() {
+            const username = prompt("Enter your name:");
+            const res = await fetch('/create_game', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username})
+            });
+            const data = await res.json();
+            gameCode = data.game_code;
+            window.history.replaceState({}, '', `lobby.html?code=${gameCode}&host=1`);
+            await joinGame(username);
+        }
+
+        async function joinGame(username) {
+            await fetch('/join_game', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({game_code: gameCode, username})
+            });
+        }
+
+        async function fetchPlayers() {
+            const res = await fetch(`/players/${gameCode}`);
+            const players = await res.json();
+            document.getElementById('players').innerHTML = 
+                '<b>Players:</b><br>' + players.map(p => p.username).join('<br>');
+        }
+
+        function showCode() {
+            document.getElementById('code').textContent = gameCode;
+        }
+
+        async function init() {
+            showCode();
+            if (isHost && !gameCode) {
+                await createGame();
+            } else if (!isHost && gameCode) {
+                const username = prompt("Enter your name:");
+                await joinGame(username);
+            }
+            setInterval(fetchPlayers, 1500);
+            if (isHost) document.getElementById('start-btn').style.display = '';
+        }
+
+        async function startGame() {
+            // Optionally, POST to backend to mark game as started
+            window.location.href = `waiting.html?code=${gameCode}&host=1`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
+

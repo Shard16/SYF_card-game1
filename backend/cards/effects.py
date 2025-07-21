@@ -1,0 +1,1 @@
+# Card effect logic (damage, healing, shield, etc.) will be implemented here.
